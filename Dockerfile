@@ -40,7 +40,8 @@ RUN sed -i -e "s/;daemonize\s*=\s*yes/daemonize = no/g" /etc/php/7.2/fpm/php-fpm
 RUN sed -i -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" /etc/php/7.2/fpm/pool.d/www.conf
 RUN find /etc/php/7.2/cli/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;\2/g' {} \;
 RUN mkdir -p /run/php
-
+RUN touch /var/log/php7.2-fpm.log
+RUN chown www-data:www-data /var/log/php7.2-fpm.log
 
 # nginx site conf
 ADD ./nginx-site.conf /etc/nginx/sites-available/default
@@ -56,6 +57,10 @@ RUN cd /usr/share/nginx/ && tar xvf latest.tar.gz && rm latest.tar.gz
 RUN rm -rf /usr/share/nginx/www
 RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
+
+# Place SSL related files
+ADD ./activate-ssl.sh /activate-ssl.sh
+ADD ./nginx-site-ssl.conf /nginx-site-ssl.conf
 
 # Wordpress Initialization and Startup Script
 ADD ./start.sh /start.sh
